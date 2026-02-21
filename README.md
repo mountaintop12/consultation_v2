@@ -146,18 +146,19 @@ As an alternative to SST/Lambda, the vote collector can run as a plain Node.js H
 ### Prerequisites
 
 - Docker and Docker Compose
-- An external PostgreSQL instance (e.g. managed Postgres, Supabase, Neon)
+- A PostgreSQL instance — either use the built-in `postgres` service (see below) or an external provider (e.g. managed Postgres, Supabase, Neon)
 - DNS A records for two subdomains pointing to your server (e.g. `app.example.com`, `api.example.com`)
 - If using Cloudflare: set SSL/TLS mode to **Full (Strict)**
 
 ### Services
 
-| Service | Description |
-| --- | --- |
-| `nginx` | Reverse proxy with TLS termination (ports 80 + 443) |
-| `certbot` | Automatic certificate renewal (checks every 12h) |
-| `consultation` | Vite + React consultation dApp (internal port 3000) |
-| `vote-collector` | Hono HTTP server + embedded poll scheduler (internal port 3001) |
+| Service | Description | Profile |
+| --- | --- | --- |
+| `nginx` | Reverse proxy with TLS termination (ports 80 + 443) | default |
+| `certbot` | Automatic certificate renewal (checks every 12h) | default |
+| `consultation` | Vite + React consultation dApp (internal port 3000) | default |
+| `vote-collector` | Hono HTTP server + embedded poll scheduler (internal port 3001) | default |
+| `postgres` | PostgreSQL 17 database (port configurable via `POSTGRES_PORT`) | `db` |
 
 ### Environment variables
 
@@ -173,6 +174,29 @@ Copy `.env.example` to `.env` and fill in the values:
 | `CERTBOT_STAGING` | Set to `1` for staging certs (testing) | `0` |
 | `VITE_PUBLIC_DAPP_DEFINITION_ADDRESS` | Radix dApp definition address | — |
 | `VITE_PUBLIC_NETWORK_ID` | Radix network ID for the dApp | `2` |
+| `POSTGRES_PORT` | Host port for the `postgres` service | `5432` |
+| `POSTGRES_USER` | PostgreSQL user | `postgres` |
+| `POSTGRES_PASSWORD` | PostgreSQL password | `postgres` |
+| `POSTGRES_DB` | PostgreSQL database name | `consultation` |
+
+### Running with the built-in PostgreSQL
+
+The `postgres` service is placed behind the `db` [Compose profile](https://docs.docker.com/compose/how-tos/profiles/) so it doesn't start by default. To include it, pass `--profile db`:
+
+```sh
+# Start all services including postgres
+docker compose -f docker-compose.production.yml --env-file .env --profile db up -d
+```
+
+When using the built-in postgres, set `DATABASE_URL` to point at the container:
+
+```
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/consultation
+```
+
+> **Note**: Inside the Docker network the hostname is `postgres` (the service name), not `localhost`.
+
+If you prefer an external database, omit `--profile db` and set `DATABASE_URL` to your external connection string.
 
 ### First-time setup
 
@@ -188,7 +212,7 @@ rm -rf certbot/conf
 bash init-letsencrypt.sh
 
 # Start all services
-docker compose -f docker-compose.production.yml up -d
+docker compose -f docker-compose.production.yml --env-file .env up -d
 ```
 
 ### Certificate renewal
@@ -197,7 +221,7 @@ Certbot automatically checks for renewal every 12 hours. However, nginx needs a 
 
 ```sh
 # Reload nginx every 12 hours to pick up renewed certificates
-0 */12 * * * docker compose -f docker-compose.production.yml exec nginx nginx -s reload
+0 */12 * * * docker compose -f docker-compose.production.yml --env-file .env exec nginx nginx -s reload
 ```
 
 > **Alternative**: For zero-renewal setups behind Cloudflare, consider using a [Cloudflare Origin CA certificate](https://developers.cloudflare.com/ssl/origin-configuration/origin-ca/) (15-year validity) instead of Let's Encrypt.
@@ -229,7 +253,7 @@ To test the nginx routing, headers, and rate limiting locally without TLS or rea
 3. Start with the local override (HTTP-only, no certbot):
 
    ```sh
-   docker compose -f docker-compose.production.yml -f docker-compose.local.yml up --build
+   docker compose -f docker-compose.production.yml -f docker-compose.local.yml --env-file .env up --build
    ```
 
 4. Verify:
@@ -237,7 +261,7 @@ To test the nginx routing, headers, and rate limiting locally without TLS or rea
    ```sh
    curl http://app.local                                              # consultation HTML
    curl http://api.local/vote-results?type=proposal&entityId=1        # API response
-   docker compose -f docker-compose.production.yml -f docker-compose.local.yml exec nginx nginx -t  # config test
+   docker compose -f docker-compose.production.yml -f docker-compose.local.yml --env-file .env exec nginx nginx -t  # config test
    ```
 
 ## Deploying Consultation (standalone)
