@@ -13,25 +13,25 @@ build_image() {
   local name="$1"
   local dockerfile="$2"
   shift 2
-  local image="${IMAGE_PREFIX}-${name}"
+  local image="${IMAGE_PREFIX}:${name}"
 
   echo "Building ${image}..."
   docker build \
     -f "$dockerfile" \
-    -t "${image}:${TIMESTAMP}" \
-    -t "${image}:sha-${GIT_SHA}" \
-    -t "${image}:latest" \
+    -t "${image}-${TIMESTAMP}" \
+    -t "${image}-sha-${GIT_SHA}" \
+    -t "${image}-latest" \
     "$@" \
     .
 
   if [[ "$PUSH" == true ]]; then
     echo "Pushing ${image}..."
-    docker push "${image}:${TIMESTAMP}"
-    docker push "${image}:sha-${GIT_SHA}"
-    docker push "${image}:latest"
+    docker push "${image}-${TIMESTAMP}"
+    docker push "${image}-sha-${GIT_SHA}"
+    docker push "${image}-latest"
   fi
 
-  echo "Done: ${image}:${TIMESTAMP}"
+  echo "Done: ${image}-${TIMESTAMP}"
 }
 
 case "$TARGET" in
