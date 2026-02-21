@@ -28,6 +28,9 @@ COPY --from=pruner /app/out/full/ .
 RUN pnpm --filter consultation-dapp build
 
 FROM base AS runner
+LABEL org.opencontainers.image.title="consultation-client" \
+      org.opencontainers.image.description="Radix governance consultation dApp — Vite + React frontend served by Nitro" \
+      org.opencontainers.image.source="https://github.com/radixdlt/consultation-v2"
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NITRO_HOST=0.0.0.0
