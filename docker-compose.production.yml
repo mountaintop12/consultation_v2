@@ -1,4 +1,7 @@
+name: radix.consultation-v2
+
 services:
+
   nginx:
     image: nginx:1.27-alpine
     ports:
@@ -61,3 +64,26 @@ services:
     restart: always
     networks:
       - default
+
+  postgres:
+    image: postgres:17-alpine
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-consultation}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-consultation}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - default
+    profiles:
+      - db
+
+volumes:
+  pgdata:
