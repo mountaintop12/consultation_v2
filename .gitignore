@@ -15,6 +15,7 @@ node_modules
 .env.production
 .env.stokenet
 .env.mainnet
+.env.docker.compose
 
 # Testing
 coverage
