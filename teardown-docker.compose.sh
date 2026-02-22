@@ -23,8 +23,12 @@ case "$1" in
     MODE="production with DB"
     ;;
   --local)
-    COMPOSE_FILES="-f docker-compose.local.yml"
+    COMPOSE_FILES="-f docker-compose.production.yml -f docker-compose.local.yml"
     MODE="local"
+    ;;
+  --local-with-db)
+    COMPOSE_FILES="-f docker-compose.production.yml -f docker-compose.production.db.yml -f docker-compose.local.yml"
+    MODE="local with DB"
     ;;
   *)
     usage
