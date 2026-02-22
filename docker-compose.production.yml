@@ -1,4 +1,4 @@
-name: radix.consultation-v2
+name: radix-consultation-v2
 
 services:
 
@@ -34,28 +34,22 @@ services:
       - default
 
   consultation:
-    build:
-      context: .
-      dockerfile: dockerfiles/client.Dockerfile
-      args:
-        VITE_ENV: production
-        VITE_VOTE_COLLECTOR_URL: https://${API_DOMAIN}
-        VITE_PUBLIC_DAPP_DEFINITION_ADDRESS: ${VITE_PUBLIC_DAPP_DEFINITION_ADDRESS}
-        VITE_PUBLIC_NETWORK_ID: ${VITE_PUBLIC_NETWORK_ID}
+    image: ${DOCKER_IMAGE_CLIENT:-mountaintop12/consultation:client-latest}
     expose:
-      - "3000"
+      - 3000
+    # ports:
+    #   - 3000:3000
     depends_on:
       - vote-collector
     restart: always
+    env_file: .env
     networks:
       - default
 
   vote-collector:
-    build:
-      context: .
-      dockerfile: dockerfiles/server.Dockerfile
+    image: ${DOCKER_IMAGE_SERVER:-mountaintop12/consultation:server-latest}
     expose:
-      - "3001"
+      - 3001
     environment:
       DATABASE_URL: ${DATABASE_URL}
       NETWORK_ID: ${NETWORK_ID}
@@ -64,26 +58,3 @@ services:
     restart: always
     networks:
       - default
-
-  postgres:
-    image: postgres:17-alpine
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-consultation}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-consultation}"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-    networks:
-      - default
-    profiles:
-      - db
-
-volumes:
-  pgdata:
