@@ -43,6 +43,8 @@ services:
       - vote-collector
     restart: always
     env_file: .env
+    volumes:
+      - ./config.production.js:/app/.output/public/config.js:ro
     networks:
       - default
 
