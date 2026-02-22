@@ -1,9 +1,19 @@
 import { AccountAddress } from '@radix-effects/shared'
-import * as EffectBoolean from 'effect/Boolean'
 import * as Either from 'effect/Either'
-import { constant, pipe } from 'effect/Function'
+import { pipe } from 'effect/Function'
 import { TreeFormatter } from 'effect/ParseResult'
 import * as Schema from 'effect/Schema'
+
+declare global {
+  interface Window {
+    __RUNTIME_CONFIG__?: {
+      ENV?: string
+      DAPP_DEFINITION_ADDRESS?: string
+      NETWORK_ID?: string
+      VOTE_COLLECTOR_URL?: string
+    }
+  }
+}
 
 class EnvVars extends Schema.Class<EnvVars>('EnvVars')({
   ENV: Schema.Literal('dev', 'staging', 'prod', 'local').annotations({
@@ -14,7 +24,9 @@ class EnvVars extends Schema.Class<EnvVars>('EnvVars')({
   VOTE_COLLECTOR_URL: Schema.String
 }) {}
 
-const isVitest = typeof import.meta.env.VITEST !== 'undefined'
+const isVitest =
+  typeof import.meta.env !== 'undefined' &&
+  typeof import.meta.env.VITEST !== 'undefined'
 
 const vitestMockEnvVars: typeof EnvVars.Encoded = {
   ENV: 'dev',
@@ -25,17 +37,28 @@ const vitestMockEnvVars: typeof EnvVars.Encoded = {
   VOTE_COLLECTOR_URL: 'http://localhost:3001'
 }
 
+const getRawEnvVars = (): Record<keyof typeof EnvVars.Encoded, unknown> => {
+  if (isVitest) return vitestMockEnvVars
+
+  // Client-side: read from config.js (window.__RUNTIME_CONFIG__)
+  if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
+    return window.__RUNTIME_CONFIG__ as Record<
+      keyof typeof EnvVars.Encoded,
+      unknown
+    >
+  }
+
+  // Server-side (SSR): fallback to process.env
+  return {
+    ENV: process.env.VITE_ENV as unknown,
+    DAPP_DEFINITION_ADDRESS: process.env.VITE_PUBLIC_DAPP_DEFINITION_ADDRESS as unknown,
+    NETWORK_ID: process.env.VITE_PUBLIC_NETWORK_ID as unknown,
+    VOTE_COLLECTOR_URL: process.env.VITE_VOTE_COLLECTOR_URL as unknown
+  }
+}
+
 export const envVars = pipe(
-  EffectBoolean.match(isVitest, {
-    onTrue: constant(vitestMockEnvVars),
-    onFalse: constant({
-      ENV: import.meta.env.VITE_ENV as unknown,
-      DAPP_DEFINITION_ADDRESS: import.meta.env
-        .VITE_PUBLIC_DAPP_DEFINITION_ADDRESS as unknown,
-      NETWORK_ID: import.meta.env.VITE_PUBLIC_NETWORK_ID as unknown,
-      VOTE_COLLECTOR_URL: import.meta.env.VITE_VOTE_COLLECTOR_URL as unknown
-    } satisfies Record<keyof typeof EnvVars.Encoded, unknown>)
-  }),
+  getRawEnvVars(),
   Schema.decodeUnknownEither(EnvVars),
   Either.map((envVars) => ({
     ...envVars,

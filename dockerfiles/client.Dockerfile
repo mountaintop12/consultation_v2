@@ -17,11 +17,6 @@ COPY --from=pruner /app/out/json/ .
 RUN pnpm install
 
 FROM base AS builder
-ARG VITE_ENV
-ARG VITE_VOTE_COLLECTOR_URL
-ARG VITE_PUBLIC_DAPP_DEFINITION_ADDRESS
-ARG VITE_PUBLIC_NETWORK_ID
-ENV VITE_ENV=$VITE_ENV
 WORKDIR /app
 COPY --from=deps /app/ .
 COPY --from=pruner /app/out/full/ .
