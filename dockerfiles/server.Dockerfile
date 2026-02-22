@@ -23,6 +23,9 @@ COPY --from=pruner /app/out/full/ .
 RUN pnpm --filter vote-collector build
 
 FROM base AS runner
+LABEL org.opencontainers.image.title="consultation-server" \
+      org.opencontainers.image.description="Radix governance vote collector — Hono HTTP server with embedded poll scheduler" \
+      org.opencontainers.image.source="https://github.com/radixdlt/consultation-v2"
 WORKDIR /app
 ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \

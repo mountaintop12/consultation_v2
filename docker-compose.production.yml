@@ -1,4 +1,7 @@
+name: radix-consultation-v2
+
 services:
+
   nginx:
     image: nginx:1.27-alpine
     ports:
@@ -31,28 +34,24 @@ services:
       - default
 
   consultation:
-    build:
-      context: .
-      dockerfile: dockerfiles/client.Dockerfile
-      args:
-        VITE_ENV: production
-        VITE_VOTE_COLLECTOR_URL: https://${API_DOMAIN}
-        VITE_PUBLIC_DAPP_DEFINITION_ADDRESS: ${VITE_PUBLIC_DAPP_DEFINITION_ADDRESS}
-        VITE_PUBLIC_NETWORK_ID: ${VITE_PUBLIC_NETWORK_ID}
+    image: ${DOCKER_IMAGE_CLIENT:-mountaintop12/consultation:client-latest}
     expose:
-      - "3000"
+      - 3000
+    # ports:
+    #   - 3000:3000
     depends_on:
       - vote-collector
     restart: always
+    env_file: .env
+    volumes:
+      - ./config.production.js:/app/.output/public/config.js:ro
     networks:
       - default
 
   vote-collector:
-    build:
-      context: .
-      dockerfile: dockerfiles/server.Dockerfile
+    image: ${DOCKER_IMAGE_SERVER:-mountaintop12/consultation:server-latest}
     expose:
-      - "3001"
+      - 3001
     environment:
       DATABASE_URL: ${DATABASE_URL}
       NETWORK_ID: ${NETWORK_ID}
