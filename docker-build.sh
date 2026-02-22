@@ -15,9 +15,10 @@ build_image() {
   shift 2
   local image="${IMAGE_PREFIX}:${name}"
 
-  echo "Building ${image}..."
+  echo "\nBuilding ${image}...\n"
   docker build \
     -f "$dockerfile" \
+    --platform linux/amd64 \
     -t "${image}-${TIMESTAMP}" \
     -t "${image}-sha-${GIT_SHA}" \
     -t "${image}-latest" \
@@ -25,7 +26,7 @@ build_image() {
     .
 
   if [[ "$PUSH" == true ]]; then
-    echo "Pushing ${image}..."
+    echo "\nPushing ${image}...\n"
     docker push "${image}-${TIMESTAMP}"
     docker push "${image}-sha-${GIT_SHA}"
     docker push "${image}-latest"
