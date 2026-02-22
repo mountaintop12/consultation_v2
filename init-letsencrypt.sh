@@ -12,7 +12,7 @@ set -euo pipefail
 # Load .env if present
 if [ -f .env ]; then
   set -a
-  source .env
+  source .env.docker.compose
   set +a
 fi
 
@@ -22,7 +22,7 @@ fi
 CERTBOT_STAGING="${CERTBOT_STAGING:-0}"
 
 cert_path="./certbot/conf/live/$APP_DOMAIN"
-compose="docker compose -f docker-compose.production.yml"
+compose="docker compose -f docker-compose.production.yml -f docker-compose.production.db.yml"
 
 # 1. Skip if real certs already exist
 if [ -f "$cert_path/fullchain.pem" ] && [ ! -f "$cert_path/.dummy" ]; then
@@ -42,9 +42,6 @@ touch "$cert_path/.dummy"
 echo "### Starting nginx with dummy certificate ..."
 $compose up -d nginx
 
-echo "### Removing dummy certificate ..."
-rm -rf "$cert_path"
-
 echo "### Requesting real certificate from Let's Encrypt ..."
 staging_arg=""
 if [ "$CERTBOT_STAGING" = "1" ]; then
@@ -52,7 +49,10 @@ if [ "$CERTBOT_STAGING" = "1" ]; then
   echo "    (using staging environment)"
 fi
 
-$compose run --rm certbot certonly \
+$compose run \
+  --rm \
+  --entrypoint certbot \
+  certbot certonly \
   --webroot -w /var/www/certbot \
   $staging_arg \
   --email "$CERTBOT_EMAIL" \
@@ -61,9 +61,19 @@ $compose run --rm certbot certonly \
   -d "$APP_DOMAIN" \
   -d "$API_DOMAIN"
 
+# Remove the old/live directory
+rm -rf ./certbot/conf/live/${APP_DOMAIN}
+rm -rf ./certbot/conf/archive/${APP_DOMAIN}
+rm -f  ./certbot/conf/renewal/${APP_DOMAIN}.conf
+
+# Rename the -0001 directories to the original name
+mv ./certbot/conf/live/${APP_DOMAIN}-0001 ./certbot/conf/live/${APP_DOMAIN}
+mv ./certbot/conf/archive/${APP_DOMAIN}-0001 ./certbot/conf/archive/${APP_DOMAIN}
+mv ./certbot/conf/renewal/${APP_DOMAIN}-0001.conf ./certbot/conf/renewal/${APP_DOMAIN}.conf
+
 echo "### Reloading nginx with real certificate ..."
 $compose exec nginx nginx -s reload
 
 echo ""
 echo "Done! Certificates issued for $APP_DOMAIN and $API_DOMAIN."
-echo "Run: $compose up -d"
+echo "Run: $compose up -d --force-recreate"
