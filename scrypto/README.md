@@ -57,7 +57,7 @@ After deployment, note down the **package address** (e.g., `package_rdx1p...`).
 
 ### 3. Create an owner badge
 
-You can use an existing token as the owner badge, or create a new one at [console.radixdlt.com/create-token](https://console.radixdlt.com/create-token). Create a fungible token with 0 divisibility and a supply of 1.
+You can use an existing token as the owner badge, or create a new one at [console.radixdlt.com/create-token](https://console.radixdlt.com/create-token). Create a fungible token with 0 divisibility, and a supply of however many owners of the consultation / governance component you want. **Note**: you need to be an owner of the component, to be able to promote TCs to Proposals, so if you want help with this, create a lot of badges. You can never have too little ;)
 
 Note down the **owner badge resource address** (e.g., `resource_rdx1t...`).
 
