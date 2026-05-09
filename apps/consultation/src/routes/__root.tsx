@@ -79,9 +79,9 @@ function RootComponent() {
     <RegistryProvider>
       <Toaster />
       <ThemeProvider>
-        <div className="min-h-screen flex flex-col">
+        <div className="flex min-h-screen flex-col overflow-x-clip">
           <Header />
-          <main className="flex-grow w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <main className="mx-auto min-w-0 w-full max-w-6xl flex-grow px-4 py-8 sm:px-6 lg:px-8">
             <Outlet />
           </main>
           <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">

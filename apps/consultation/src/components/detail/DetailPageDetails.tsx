@@ -37,7 +37,7 @@ export function DetailPageDetails({
         <h3 className="text-lg font-semibold text-foreground mb-2">
           Description
         </h3>
-        <p className="text-muted-foreground whitespace-pre-wrap">
+        <p className="whitespace-pre-wrap break-words text-muted-foreground">
           {shortDescription}
         </p>
       </div>
@@ -46,18 +46,21 @@ export function DetailPageDetails({
       {proposalVoteOptions && proposalVoteOptions.length > 0 && (
         <div className="mt-6">
           <p className="text-xs text-muted-foreground mb-4">
-            These options will be available for voting if this TC is promoted to a Governance Proposal.
+            These options will be available for voting if this TC is promoted to
+            a Governance Proposal.
           </p>
           <div className="space-y-2">
             {proposalVoteOptions.map((option, index) => (
               <div
                 key={option.id}
-                className="flex items-center gap-3 p-3 border border-border bg-secondary/50 text-sm"
+                className="flex min-w-0 items-center gap-3 border border-border bg-secondary/50 p-3 text-sm"
               >
                 <span className="size-6 flex items-center justify-center text-xs font-bold text-muted-foreground bg-background border border-border">
                   {index + 1}
                 </span>
-                <span className="font-medium text-foreground">{option.label}</span>
+                <span className="min-w-0 break-words font-medium text-foreground">
+                  {option.label}
+                </span>
               </div>
             ))}
           </div>
@@ -80,7 +83,7 @@ export function DetailPageDetails({
               Download .md
             </button>
           </div>
-          <div className="prose dark:prose-invert max-w-none">
+          <div className="prose max-w-none break-words dark:prose-invert prose-pre:overflow-x-auto prose-a:break-all">
             <Markdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeSanitize]}
