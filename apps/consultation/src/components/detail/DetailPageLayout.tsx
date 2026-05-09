@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
 import { Vote } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -36,24 +36,20 @@ export function DetailPageLayout({
       </div>
 
       {/* Mobile layout with tabs */}
-      <div className="lg:hidden">
-        <div className="space-y-8">
+      <div className="min-w-0 lg:hidden">
+        <div className="min-w-0 space-y-8">
           {header}
 
-          <Tabs defaultValue="details">
+          <Tabs defaultValue="details" className="min-w-0">
             <TabsList className="w-full">
               <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="results">Results</TabsTrigger>
             </TabsList>
-            <TabsContent value="details">
-              <div className="space-y-8 pt-4">
-                {details}
-              </div>
+            <TabsContent value="details" className="min-w-0">
+              <div className="min-w-0 space-y-8 pt-4">{details}</div>
             </TabsContent>
-            <TabsContent value="results">
-              <div className="space-y-6 pt-4">
-                {resultsContent}
-              </div>
+            <TabsContent value="results" className="min-w-0">
+              <div className="min-w-0 space-y-6 pt-4">{resultsContent}</div>
             </TabsContent>
           </Tabs>
 
@@ -66,16 +62,14 @@ export function DetailPageLayout({
           <DrawerTrigger asChild>
             <Button
               size="icon"
-              className="fixed bottom-6 right-6 size-14 rounded-full shadow-lg"
+              className="fixed right-4 bottom-4 size-14 rounded-full shadow-lg sm:right-6 sm:bottom-6"
             >
               <Vote className="size-6" />
               <span className="sr-only">Open voting panel</span>
             </Button>
           </DrawerTrigger>
           <DrawerContent className="max-h-[80vh]">
-            <div className="overflow-y-auto p-6">
-              {votingContent}
-            </div>
+            <div className="min-w-0 overflow-y-auto p-6">{votingContent}</div>
           </DrawerContent>
         </Drawer>
       </div>

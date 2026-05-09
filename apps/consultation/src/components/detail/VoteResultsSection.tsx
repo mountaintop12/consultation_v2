@@ -17,9 +17,7 @@ export function VoteResultsSection({
   entityId,
   voteOptions
 }: VoteResultsSectionProps) {
-  const voteResultsResult = useAtomValue(
-    voteResultsAtom(entityType)(entityId)
-  )
+  const voteResultsResult = useAtomValue(voteResultsAtom(entityType)(entityId))
 
   return Result.builder(voteResultsResult)
     .onInitial(() => (
@@ -62,7 +60,7 @@ export function VoteResultsSection({
       }))
 
       return (
-        <div className="bg-card border border-border p-6 shadow-sm">
+        <div className="min-w-0 border border-border bg-card p-6 shadow-sm">
           <div className="mb-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
               Current Results
@@ -72,17 +70,15 @@ export function VoteResultsSection({
           <div className="space-y-4">
             {allOptions.map((option) => {
               const percentage =
-                totalVotePower > 0
-                  ? (option.power / totalVotePower) * 100
-                  : 0
+                totalVotePower > 0 ? (option.power / totalVotePower) * 100 : 0
 
               return (
-                <div key={option.key}>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="font-medium text-foreground max-w-[55%]">
+                <div key={option.key} className="min-w-0">
+                  <div className="mb-2 flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-1 text-sm">
+                    <span className="min-w-0 max-w-full break-words font-medium text-foreground sm:max-w-[55%]">
                       {option.label}
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="shrink-0 text-muted-foreground">
                       {formatXrd(option.power)} XRD ({percentage.toFixed(1)}%)
                     </span>
                   </div>
